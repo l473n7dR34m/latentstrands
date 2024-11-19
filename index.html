@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>p5.js Sketch</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.min.js"></script>
+    <style>
+        /* Hide the default file input button */
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Style the custom upload button */
+        .upload-btn {
+            position: absolute;
+            top: 20px;
+            right: 120px;  /* Move the button slightly to the left */
+            padding: 10px;
+            background-color: #EA4E83;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            width: auto; /* Set width to auto to fit text */
+            min-width: 160px; /* Set a minimum width */
+            text-align: center; /* Center the text */
+        }
+
+        /* Hover effect */
+        .upload-btn:hover {
+            background-color: #DB2B6B;
+            transform: translateY(-2px);
+        }
+
+        /* Active (clicked) effect */
+        .upload-btn:active {
+            background-color: #C5034F;
+            transform: translateY(1px);
+        }
+
+        /* Loading bar container */
+        #loading-container {
+            position: absolute;
+            top: 60px; /* Move the loading bar directly below the button */
+            right: 120px; /* Align the loading bar with the button */
+            width: 200px; /* Match the width of the upload button */
+            height: 20px;
+            background-color: #ddd;
+            border-radius: 5px;
+            display: none; /* Hidden by default */
+        }
+
+        /* Loading bar itself */
+        #loading-bar {
+            height: 100%;
+            width: 0;
+            background-color: #4CAF50;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Custom styled button -->
+    <label for="imageUpload" class="upload-btn">Upload Image</label>
+    <input type="file" id="imageUpload" accept="image/*" onchange="handleFile(this.files)" />
+
+    <!-- Loading bar container -->
+    <div id="loading-container">
+        <div id="loading-bar"></div>
+    </div>
+
+    <script src="sketch.js"></script>
+
+    <script>
+        // Declare the handleFile function inside the HTML
+        function handleFile(files) {
+            const file = files[0];
+            if (file && file.type.startsWith('image/')) {
+                // Show the loading bar
+                document.getElementById('loading-container').style.display = 'block';
+                document.getElementById('loading-bar').style.width = '0%'; // Reset loading bar
+
+                // Hide the upload button
+                document.querySelector('.upload-btn').style.display = 'none';
+
+                // Start loading the image
+                isLoading = true;
+                uploadedImage = loadImage(URL.createObjectURL(file), () => {
+                    uploadedImage.resize(width, height); // Resize image to fit canvas
+
+                    // Hide the loading bar and show the uploaded image
+                    document.getElementById('loading-container').style.display = 'none';
+                    isLoading = false;
+                }, (err) => {
+                    console.error('Error loading image:', err);
+                    // Reset button and loading bar on error
+                    document.querySelector('.upload-btn').style.display = 'block';
+                    document.getElementById('loading-container').style.display = 'none';
+                });
+
+                // Update the loading bar as the image is loading
+                updateLoadingBar();
+            } else {
+                console.error('Selected file is not an image');
+            }
+        }
+
+        // Update the loading bar
+        function updateLoadingBar() {
+            if (isLoading) {
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 5; // Increase progress by 5%
+                    document.getElementById('loading-bar').style.width = `${progress}%`;
+
+                    if (progress >= 100) {
+                        clearInterval(interval); // Stop updating the bar once it's full
+                    }
+                }, 50); // Update every 50ms
+            }
+        }
+    </script>
+</body>
+</html>
